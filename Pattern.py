@@ -38,7 +38,7 @@ class SMB3(Pattern):
 class SMB4(Pattern):
 	def __init__(self):
 		Pattern.__init__(self, 116)
-		self.timeStep=.09
+		self.timeStep=.05
 		self.image=Image.open("SMB4gif/SMB4-"+str(self.currentState)+".gif")
 		self.image.load()
 	

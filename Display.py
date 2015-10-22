@@ -20,12 +20,16 @@ class Display:
 		self.currentPattern=SMB3()
 	
 	def start(self):
-		while(True):
-			next=True
-			while(next):
-				next=not (self.update())
-				time.sleep(self.currentPattern.getTimeStep())
-			self.nextPattern()
+		try:
+			while(True):
+				next=True
+				while(next):
+					next=not (self.update())
+					time.sleep(self.currentPattern.getTimeStep())
+				self.nextPattern()
+		except KeyboardInterrupt:
+			pass
+		self.matrix.Clear()
 	
 	def drawPixels(self, image):
 		self.matrix.SetImage(image.im.id, 0,0)
