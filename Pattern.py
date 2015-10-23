@@ -50,3 +50,17 @@ class SMB4(Pattern):
 	
 	def getPixels(self):
 		return self.image
+		
+class TULogo(Pattern):
+	def __init__(self):
+		Pattern.__init__(self, 100)
+		self.timeStep=.1
+		self.image=Image.open("TU.png")
+		self.image.load()
+	
+	def tick(self):
+		self.currentState+=1
+		return self.currentState>=self.maxStates
+	
+	def getPixels(self):
+		return self.image

@@ -7,6 +7,7 @@ from rgbmatrix import Adafruit_RGBmatrix
 from Pattern import Pattern
 from Pattern import SMB3
 from Pattern import SMB4
+from Pattern import TULogo
 
 # Rows and chain length are both required parameters:
 #matrix = Adafruit_RGBmatrix(32, 1)
@@ -17,7 +18,7 @@ class Display:
 		#self.updateTimer=0
 		self.matrix=Adafruit_RGBmatrix(32, 1)
 		self.patternTimer=0
-		self.currentPattern=SMB3()
+		self.currentPattern=TULogo()
 	
 	def start(self):
 		try:
@@ -39,10 +40,13 @@ class Display:
 		return self.currentPattern.tick()
 	
 	def nextPattern(self):
-		if random.random()<.5 :
+		rand=random.random()
+		if rand<.33 :
 			self.currentPattern=SMB3()
-		else :
+		elif rand<.66 :
 			self.currentPattern=SMB4()
+		else:
+			self.currentPattern=TULogo()
 	
 	
 disp=Display()
