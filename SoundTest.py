@@ -6,6 +6,7 @@ import time
 import Image
 import ImageDraw
 import util
+import sys
 from collections import deque
 
 from rgbmatrix import Adafruit_RGBmatrix
@@ -28,24 +29,28 @@ data_in.setperiodsize(256)
 while True:
 	# Read data from device
 	l,data = data_in.read()
-	if l:
-		# catch frame error
-		try:
-			max_vol=audioop.max(data,2)
-			#scaled_vol = max_vol//4680      
-			print(max_vol)
-			pastData.popleft()
-			pastData.append(util.soundToColor(max_vol))
-			for r in range(23, 0, -1):
-				color=pastData.popleft()
-				draw.ellipse((16-r, 16-r, 16+r, 16+r), outline=color)
-				pastData.append(color)
-				
-			matrix.SetImage(image.im.id, 0, 0)
-			time.sleep(0.025)
+	try:
+		if l:
+			# catch frame error
+			try:
+				max_vol=audioop.max(data,2)
+				#scaled_vol = max_vol//4680      
+				print(max_vol)
+				pastData.popleft()
+				pastData.append(util.soundToColor(max_vol))
+				for r in range(23, 0, -1):
+					color=pastData.popleft()
+					draw.ellipse((16-r, 16-r, 16+r, 16+r), outline=color)
+					pastData.append(color)
+					
+				matrix.SetImage(image.im.id, 0, 0)
+				time.sleep(0.025)
 
 
 
-		except audioop.error, e:
-			if e.message !="not a whole number of frames":
-				raise e
+			except audioop.error, e:
+				if e.message !="not a whole number of frames":
+					raise e
+	except KeyboardInterrupt:
+		matrix.Clear()
+		sys.exit()
