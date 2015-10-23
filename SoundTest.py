@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import alsaaudio as aa
 import audioop
 from time import sleep
