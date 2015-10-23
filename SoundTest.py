@@ -5,7 +5,7 @@ import audioop
 import time
 import Image
 import ImageDraw
-import random
+import util
 from collections import deque
 
 from rgbmatrix import Adafruit_RGBmatrix
@@ -32,10 +32,10 @@ while True:
 		# catch frame error
 		try:
 			max_vol=audioop.max(data,2)
-			scaled_vol = max_vol//4680      
+			#scaled_vol = max_vol//4680      
 			print(max_vol)
 			pastData.popleft()
-			pastData.append(( max_vol//256, max_vol%256, 0 ))
+			pastData.append(util.soundToColor(max_vol))
 			for r in range(23, 0, -1):
 				color=pastData.popleft()
 				draw.ellipse((16-r, 16-r, 16+r, 16+r), outline=color)
