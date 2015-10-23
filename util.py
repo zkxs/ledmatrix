@@ -18,3 +18,4 @@ def soundToColor(soundAmplitude):
 	green = upscaledSound % byteSize
 	upscaledSound /= 255
 	blue  = upscaledSound % byteSize
+	return (red, green, blue)
