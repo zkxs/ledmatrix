@@ -8,3 +8,4 @@
 /lib
 /pyalsa-1.0.14rc3
 /rgbmatrix.so
+*.pyc
