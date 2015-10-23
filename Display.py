@@ -15,8 +15,17 @@ from Pattern import TULogo
 # Rows and chain length are both required parameters:
 #matrix = Adafruit_RGBmatrix(32, 1)
 
+def randomPattern():
+		rand=random.random()
+		if rand<.33 :
+			return SMB3()
+		elif rand<.66 :
+			return SMB4()
+		else:
+			return TULogo()
+
 class Display:
-	
+
 	def __init__(self):
 		#self.updateTimer=0
 		self.matrix=Adafruit_RGBmatrix(32, 1)
@@ -49,8 +58,9 @@ class Display:
 			self.nextPattern = lambda: TULogo()
 			print "selected TULOGO pattern"
 		elif patternString == "":
-			print helpString
-			sys.exit(2)
+			self.nextPattern = lambda: randomPattern()
+				
+			print "selected random pattern"
 		else:
 			print "Invalid pattern, options are: SMB3, SMB4, TULogo"
 			sys.exit(3)
