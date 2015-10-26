@@ -33,14 +33,15 @@ while True:
 		if l:
 			# catch frame error
 			try:
-				max_vol=audioop.max(data,2)
-				#scaled_vol = max_vol//4680      
-				print(max_vol)
+				max_vol=audioop.max(data,2)#2 Bytes filter below 5000
+				#max_vol=audioop.max(data,4)#4bytes, filter below 400000000
+				#scaled_vol = max_vol//4680
+				#print(max_vol)
 				pastData.popleft()
 				pastData.append(util.soundToColor(max_vol))
 				for r in range(23, 0, -1):
 					color=pastData.popleft()
-					draw.ellipse((16-r, 16-r, 16+r, 16+r), outline=color)
+					draw.ellipse((16-r, 16-r, 16+r, 16+r), fill=color)
 					pastData.append(color)
 					
 				matrix.SetImage(image.im.id, 0, 0)
