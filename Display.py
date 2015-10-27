@@ -18,16 +18,18 @@ class Display:
 		self.patternTimer=0
 		self.nextPattern= pattern
 		self.currentPattern = pattern
+		self.terminateFlag=False
 		
 	
 	def start(self):
-		while(True):
+		while(not self.terminateFlag):
 			next=True
 			self.currentPattern = self.nextPattern()
 			while(next):
 				next=not (self.update())
 				time.sleep(self.currentPattern.getTimeStep())
-
+		self.matrix.Clear()
+		print ("Display Thread Ending")
 		
 	
 	def drawPixels(self, image):
@@ -38,7 +40,8 @@ class Display:
 		return self.currentPattern.tick()
 	
 	def shutdown(self):
-		self.matrix.Clear()
+		self.terminateFlag=True
+		
 	
 # disp=Display(Adafruit_RGBmatrix(32, 1), lambda: randomPattern())
 # try:

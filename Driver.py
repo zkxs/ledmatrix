@@ -15,7 +15,7 @@ import audioop
 
 class Driver:
 	def __init__(self):
-		
+		self.terminateFlag=False
 		patternString = ''
 		helpString = 'Display.py -p <pattern>'
 
@@ -67,54 +67,49 @@ class Driver:
 	
 	def runAudio(self, data_in):#not set to terminate cleanly
 		audioPattern=Circles()
-		idleCounter=0
 		print("audioStarting")
-		while True:
+		while (not self.terminateFlag):
 			# Read data from device
 			l,data = data_in.read()
-			try:
-				if l:
-					# catch frame error
-					try:
-						max_vol=audioop.max(data,2)#2 Bytes filter below 5000
-						if(max_vol>6000):
-							if(self.audioPlaying):
-								audioPattern.addAmplitudePoint(max_vol)
-							else:
-								self.audioPlaying=True
-								self.display.currentPattern=audioPattern
-						else:
-							if(self.audioPlaying):
-								idleCounter+=1
-								if(idleCounter>=1000):#Arbitrary choice
-									print ("Idle")
-									currentPattern=StaticImage(10, "TU.png")
-									self.audioPlaying=False
-					except audioop.error, e:
-						if e.message !="not a whole number of frames":
-							raise e
-			except KeyboardInterrupt:
-				matrix.Clear()
-				sys.exit()
+			if l:
+				# catch frame error
+				try:
+					max_vol=audioop.max(data,2)#2 Bytes filter below 5000
+					audioPattern.addAmplitudePoint(max_vol)
+					if(max_vol>7000):#be extra sure here to avoid static (formerly 6000)
+						if(not self.audioPlaying):
+							self.audioPlaying=True
+							self.display.currentPattern=audioPattern
+					else:
+						if(self.audioPlaying):
+							self.audioPlaying=False
+				except audioop.error, e:
+					if e.message !="not a whole number of frames":
+						raise e
+			time.sleep(0)#let other threads work
+		print ("Audio Thread Ending")
+		
 	
 	def shutdown(self):
 		self.display.shutdown()
 		#self.audioProcessor.shutdown()
 	
 	def start(self):
-		try:
-			dispThread=Thread(target=self.display.start)
-			audioThread=Thread(target=self.runAudio, args=(self.audioProcessor,))#also wrong input
-			dispThread.start()
-			print("Begin audio 2")
-			audioThread.start()
-		except error, e:
-			raise e
-			sys.exit()
+		dispThread=Thread(target=self.display.start)
+		audioThread=Thread(target=self.runAudio, args=(self.audioProcessor,))#also wrong input
+		dispThread.start()
+		audioThread.start()
+		print("Blocking")
+		
+			
 	
 driver=Driver()
 try:
 	driver.start()
+	while (True):
+		time.sleep(2147483647)#Sleep forever... Join was problematic for some reason
 except KeyboardInterrupt:
+	print ("Exiting")
+	driver.terminateFlag=True
 	driver.shutdown()
 	sys.exit()
