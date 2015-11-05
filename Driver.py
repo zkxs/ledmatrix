@@ -14,7 +14,6 @@ from AudioProcessor import AudioProcessor
 
 class Driver:
 	def __init__(self):
-		self.terminateFlag=False
 		patternString = ''
 		helpString = 'Display.py -p <pattern>'
 
@@ -74,6 +73,5 @@ try:
 		time.sleep(2147483647)#Sleep forever... Join was problematic for some reason
 except KeyboardInterrupt:
 	print ("Exiting")
-	driver.terminateFlag=True
+	
 	driver.shutdown()
-	sys.exit()
