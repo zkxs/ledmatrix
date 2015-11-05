@@ -11,13 +11,14 @@ class Pattern:
 	def __init__(self, maxStates, timeStep):
 		self.currentState=0
 		self.maxStates=maxStates
-		self.timeStep=timeStep #s
+		self.timeStep=timeStep # seconds
 	
 	def tick(self):
 		self.currentState+=1
 		return self.currentState>=self.maxStates
 	
 	def getPixels(self):
+		# child classes override this behavior
 		return
 		
 	def getTimeStep(self):
@@ -67,7 +68,7 @@ class Animated(Pattern):
 		return self.image
 	
 	def restart(self):
-		self.currentState=0
+		self.currentState= -1 # this is actually correct
 		
 class StaticImage(Pattern):
 	def __init__(self, maxTime, fileName):
@@ -93,6 +94,8 @@ class VolumePattern(Pattern):
 		self.newVolume=0
 		
 	def addAmplitudePoint(self, volume):
+		VOLUME_THRESHOLD = 6000
+		
 		if (self.audioLock.acquire(0)==0):
 			return False#will ignore data input in this case
 		else:
@@ -100,7 +103,7 @@ class VolumePattern(Pattern):
 				)//(self.avalibleSamples+1)#Weighted average
 			self.avalibleSamples+=1
 			self.audioLock.release()
-			if(volume>6000):
+			if(volume>VOLUME_THRESHOLD):
 				self.ticksSinceAudio=0#concurrency on this variable is not important
 			return True
 	
