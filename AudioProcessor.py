@@ -34,6 +34,7 @@ class AudioProcessor:
 			# Read data from device
 			l,data = self.data_in.read()
 			print(data)
+			print("\n\n\n\n\n")
 			if l:
 				# catch frame error
 				try:
