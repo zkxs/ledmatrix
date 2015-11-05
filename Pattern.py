@@ -94,7 +94,6 @@ class VolumePattern(Pattern):
 		self.newVolume=0
 		
 	def addAmplitudePoint(self, volume):
-		VOLUME_THRESHOLD = 6000
 		
 		if (self.audioLock.acquire(0)==0):
 			return False#will ignore data input in this case
@@ -103,7 +102,7 @@ class VolumePattern(Pattern):
 				)//(self.avalibleSamples+1)#Weighted average
 			self.avalibleSamples+=1
 			self.audioLock.release()
-			if(volume>VOLUME_THRESHOLD):
+			if(volume>util.noiseThreshold):
 				self.ticksSinceAudio=0#concurrency on this variable is not important
 			return True
 	
@@ -114,7 +113,7 @@ class VolumePattern(Pattern):
 		
 class Circles(VolumePattern):
 	def __init__(self):
-		VolumePattern.__init__(self, 100, .025)
+		VolumePattern.__init__(self, 75, .025)
 		self.pastData=deque()
 		for i in range(23):
 			self.pastData.append( (0, 0, 0) )

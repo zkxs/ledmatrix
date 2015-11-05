@@ -2,6 +2,7 @@ import alsaaudio as aa
 import audioop
 from Display import Display
 from Pattern import *
+import util
 import time
 
 class AudioProcessor:
@@ -25,9 +26,12 @@ class AudioProcessor:
 			if l:
 				# catch frame error
 				try:
-					max_vol=audioop.max(data,2)#2 Bytes filter below 5000
+					max_vol=audioop.max(data,4)#2 Bytes filter below 5000 369038784 1417630784
+					#400000000
+
+					#print(max_vol)
 					audioPattern.addAmplitudePoint(max_vol)
-					if(max_vol>7000):#be extra sure here to avoid static (formerly 6000)
+					if(max_vol>util.noiseThreshold):#be extra sure here to avoid static (formerly 6000)
 						if(not self.audioPlaying):
 							self.audioPlaying=True
 							self.display.currentPattern=audioPattern
