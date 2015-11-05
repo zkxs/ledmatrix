@@ -21,7 +21,7 @@ class Display:
 		while(not self.terminateFlag):
 			next=True
 			self.currentPattern = self.nextPattern()
-			while(next):
+			while(next and not self.terminateFlag):
 				next=not (self.update())
 				time.sleep(self.currentPattern.getTimeStep())
 		self.matrix.Clear()
