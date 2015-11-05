@@ -8,18 +8,14 @@ import getopt
 from rgbmatrix import Adafruit_RGBmatrix
 from Pattern import *
 
-
-
 class Display:
 
 	def __init__(self, matrix, pattern):
-		#self.updateTimer=0
 		self.matrix=matrix
 		self.patternTimer=0
 		self.nextPattern= pattern
 		self.currentPattern = pattern
 		self.terminateFlag=False
-		
 	
 	def start(self):
 		while(not self.terminateFlag):
@@ -30,10 +26,9 @@ class Display:
 				time.sleep(self.currentPattern.getTimeStep())
 		self.matrix.Clear()
 		print ("Display Thread Ending")
-		
 	
 	def drawPixels(self, image):
-		self.matrix.SetImage(image.im.id, 0,0)
+		self.matrix.SetImage(image.im.id, 0, 0)
 	
 	def update(self):
 		self.drawPixels(self.currentPattern.getPixels())
@@ -41,12 +36,3 @@ class Display:
 	
 	def shutdown(self):
 		self.terminateFlag=True
-		
-	
-# disp=Display(Adafruit_RGBmatrix(32, 1), lambda: randomPattern())
-# try:
-	# disp.start()
-# except KeyboardInterrupt:
-	# disp.shutdown()
-	# sys.exit()
-
