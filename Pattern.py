@@ -164,7 +164,7 @@ class Bars(VolumePattern):
 	def scale(self, array):
 		# scaled range is (32 - 0) = 32
 		unscaledRange = self.maxAmplitude - self.minAmplitude
-		return np.rint(np.clip((array - self.minAmplitude) * 32 / unscaledRange, 0, 32))
+		return np.rint(np.clip((array - self.minAmplitude) * 32 / unscaledRange, 0, 32)).astype(int)
 		
 	def tick(self):
 		toReturn = VolumePattern.tick(self)
@@ -210,6 +210,8 @@ class Bars(VolumePattern):
 			x2 = x1 + self.barWidth - 1
 			y1Bar = 32 - scaledBars[i]
 			y1Cap = 32 - scaledCaps[i]
+			if (y1Cap >= 32):
+				y1Cap = 31
 			
 			barColor = None
 			if (i % 2 == 0):
