@@ -5,6 +5,7 @@ from Pattern import *
 import util
 import time
 import numpy as np
+import sys
 from collections import deque
 
 class AudioProcessor:
@@ -33,8 +34,8 @@ class AudioProcessor:
 		while (not self.terminateFlag):
 			# Read data from device
 			l,data = self.data_in.read()
-			print(data)
-			print("\n\n\n\n")
+			sys.stdout.write(data)
+			sys.stdout.write("\xFF\xFF\xFF\xFF\xFF\xFF")
 			if l:
 				# catch frame error
 				try:
