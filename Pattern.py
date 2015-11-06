@@ -189,8 +189,8 @@ class Bars(VolumePattern):
 				self.barTopVel[i] += self.barTopAccel
 			self.barTops[i] -= self.barTopVel[i]
 				
-			if (fft[i] > self.barCaps[i]):
-				self.barCaps[i] = fft[i]
+			if (barTops[i] > self.barCaps[i]):
+				self.barCaps[i] = barTops[i]
 				self.barCapVel[i] = 0	
 			else:
 				self.barCapVel[i] += self.barCapAccel
