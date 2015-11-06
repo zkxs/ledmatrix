@@ -36,6 +36,7 @@ class AudioProcessor:
 		while (not self.terminateFlag):
 			# Read data from device
 			l,data = self.data_in.read()
+			print(l)
 			assert l == self.PERIOD_SIZE, "unexpected array size"
 			arr = np.fromstring(data, dtype='<u2')
 			print(arr)
