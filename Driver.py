@@ -4,7 +4,7 @@ import time
 import random
 import sys
 import getopt
-###from rgbmatrix import Adafruit_RGBmatrix
+from rgbmatrix import Adafruit_RGBmatrix
 from Display import Display
 from Pattern import *
 from threading import Thread
@@ -43,10 +43,9 @@ class Driver:
 		
 	
 	def initDisplay(self, pattern):
-		###newDisplay=Display(Adafruit_RGBmatrix(32, 1), pattern)
-		###
-		###return newDisplay;
-		return None;
+		newDisplay=Display(Adafruit_RGBmatrix(32, 1), pattern)
+		
+		return newDisplay;
 		
 	def initAudio(self):
 		newAudio=AudioProcessor(self.display);
@@ -59,9 +58,9 @@ class Driver:
 		self.audioProcessor.shutdown()
 	
 	def start(self):
-		###dispThread=Thread(target=self.display.start)
+		dispThread=Thread(target=self.display.start)
 		audioThread=Thread(target=self.audioProcessor.start)#also wrong input
-		###dispThread.start()
+		dispThread.start()
 		audioThread.start()
 		print("Blocking")
 		
