@@ -12,7 +12,7 @@ class Display:
 
 	def __init__(self, matrix, patternFactory, audioProcessor):
 		
-		self.audioPattern = Bars(audioProcessor)
+		self.audioPattern = lambda:randomAudioPattern(audioProcessor)#Circles(audioProcessor)#Bars(audioProcessor)
 		self.matrix = matrix
 		self.patternTimer = 0
 		self.nextPattern = patternFactory
@@ -26,7 +26,7 @@ class Display:
 			next = True
 			
 			if (self.audioPlaying):
-				self.currentPattern = self.audioPattern
+				self.currentPattern = self.audioPattern()()
 				while (next and not self.terminateFlag):
 					next = not self.update()
 					time.sleep(self.currentPattern.getTimeStep())

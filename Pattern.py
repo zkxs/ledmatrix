@@ -34,8 +34,15 @@ def randomPattern():
 	elif rand<.66 :
 		return Animated(116, .05, "SMB4")
 	else:
-		return StaticImage(10, "TU.png")
+		return PongPattern()#return StaticImage(10, "TU.png")
 
+def randomAudioPattern(audioProcessor):
+	rand=random.random()
+	if rand<.5 :
+		return lambda: Circles(audioProcessor)
+	else:
+		return lambda: Bars(audioProcessor)
+		
 def getPatternFromString(patternString):	
 	if patternString == "SMB3":
 		print "selected SMB3 pattern"
@@ -267,7 +274,7 @@ class BoringLines(VolumePattern):# I was bored this is bad do not use
 
 class PongPattern(Pattern):
 	def __init__(self):
-		Pattern.__init__(self, 25, .025)
+		Pattern.__init__(self, 2500, .025)
 		self.image = Image.new("RGB", (32, 32))
 		self.draw  = ImageDraw.Draw(self.image)
 		
@@ -285,7 +292,7 @@ class PongPattern(Pattern):
 		self.ballDirX = 2*random.random()-1 ## -1 = left 1 = right
 		self.ballDirY = 2*random.random()-1 ## -1 = up 1 = down
 		
-		print ("dx,dy "+str(self.ballDirX)+", "+str(self.ballDirY))
+		#print ("dx,dy "+str(self.ballDirX)+", "+str(self.ballDirY))
 		
 		
 		#Creates Rectangles for ball and paddles.
@@ -304,7 +311,7 @@ class PongPattern(Pattern):
 	
 	#Draws the arena the game will be played in. 
 	def drawArena(self):
-		self.draw.rectangle( ((0,0),(31,31)), fill=(0,0,0))
+		self.draw.rectangle( ((-1,-1),(31,31)), fill=(0,0,0))
 		#Draw centre line
 		#self.draw.line((((pong.WINDOWWIDTH/2),0),((pong.WINDOWWIDTH/2),pong.WINDOWHEIGHT)), width=(pong.LINETHICKNESS), fill=pong.WHITE)
 
@@ -351,8 +358,8 @@ class PongPattern(Pattern):
 		#print("Ball X,Y = "+str(self.ballX)+", "+str(self.ballY))
 		#print (self.ball.centery)
 		
-		
-		if((self.score)>0):
+		self.currentState+=1
+		if((self.score)>0 or self.currentState>=self.maxStates):
 			return True
 		return False
 	
