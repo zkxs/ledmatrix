@@ -32,7 +32,7 @@ class Driver:
 		
 		pattern=getPatternFromString(patternString)
 		if(pattern is None):
-			print "Invalid pattern, options are: SMB3, SMB4, TULogo"
+			print "Invalid pattern, options are: SMB3, SMB4, TULogo, PONG"
 			sys.exit(3)
 		self.display=self.initDisplay(pattern)
 		

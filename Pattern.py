@@ -1,10 +1,12 @@
-
+import pygame, sys
+from pygame.locals import *
 import Image
 import ImageDraw
 import random
 import util
 import threading
 from collections import deque
+import pong
 
 class Pattern:
 	
@@ -43,6 +45,9 @@ def getPatternFromString(patternString):
 	elif patternString == "TULOGO":
 		print "selected TULOGO pattern"
 		return lambda: StaticImage(10, "TU.png")
+	elif patternString == "PONG":
+		print "selected Pong pattern"
+		return lambda: PongPattern()
 	elif patternString == "":
 		print "selected random pattern"
 		return lambda: randomPattern()
@@ -165,3 +170,110 @@ class BoringLines(VolumePattern):# I was bored this is bad do not use
 		self.ticksSinceAudio+=1#concurrency on this variable is not vital
 		
 		return self.ticksSinceAudio>=self.maxStates
+
+#Global Variables to be used through our program
+
+# pong.WINDOWWIDTH = 32
+# pong.WINDOWHEIGHT = 32
+# pong.LINETHICKNESS = 2
+# pong.PADDLESIZE = 10
+# pong.PADDLEOFFSET = 1
+
+# # Set up the colours
+# pong.BLACK     = (0  ,0  ,0  )
+# pong.WHITE     = (255,255,255)
+
+
+class PongPattern(Pattern):
+	def __init__(self):
+		Pattern.__init__(self, 25, .025)
+		self.image = Image.new("RGB", (32, 32))
+		self.draw  = ImageDraw.Draw(self.image)
+		
+		#Initiate variable and set starting positions
+		#any future changes made within rectangles
+		self.ballX = float(pong.WINDOWWIDTH/2 - pong.LINETHICKNESS/2)
+		self.ballY = float(pong.WINDOWHEIGHT/2 - pong.LINETHICKNESS/2)
+		self.playerOnePosition = (pong.WINDOWHEIGHT - pong.PADDLESIZE) /2
+		self.playerTwoPosition = (pong.WINDOWHEIGHT - pong.PADDLESIZE) /2
+		self.score = 0
+		
+	
+		
+		#Keeps track of ball direction
+		self.ballDirX = 2*random.random()-1 ## -1 = left 1 = right
+		self.ballDirY = 2*random.random()-1 ## -1 = up 1 = down
+		
+		print ("dx,dy "+str(self.ballDirX)+", "+str(self.ballDirY))
+		
+		
+		#Creates Rectangles for ball and paddles.
+		self.paddle1 = pygame.Rect(pong.PADDLEOFFSET,self.playerOnePosition, pong.LINETHICKNESS,pong.PADDLESIZE)
+		self.paddle2 = pygame.Rect(pong.WINDOWWIDTH - pong.PADDLEOFFSET - pong.LINETHICKNESS, self.playerTwoPosition, pong.LINETHICKNESS,pong.PADDLESIZE)
+		self.ball = pygame.Rect(self.ballX, self.ballY, pong.LINETHICKNESS, pong.LINETHICKNESS)
+		
+		self.ballX=15.0;
+		self.ballY=15.0;
+		
+		#Draws the starting position of the Arena
+		self.drawArena()
+		self.drawPaddle(self.paddle1)
+		self.drawPaddle(self.paddle2)
+		self.drawBall(self.ball)
+	
+	#Draws the arena the game will be played in. 
+	def drawArena(self):
+		self.draw.rectangle( ((0,0),(32,32)), fill=(0,0,0))
+		#Draw centre line
+		#self.draw.line((((pong.WINDOWWIDTH/2),0),((pong.WINDOWWIDTH/2),pong.WINDOWHEIGHT)), width=(pong.LINETHICKNESS), fill=pong.WHITE)
+
+
+	#Draws the paddle
+	def drawPaddle(self, paddle):
+		#Stops paddle moving too low
+		if paddle.bottom > pong.WINDOWHEIGHT - pong.LINETHICKNESS:
+			paddle.bottom = pong.WINDOWHEIGHT - pong.LINETHICKNESS
+		#Stops paddle moving too high
+		elif paddle.top < pong.LINETHICKNESS:
+			paddle.top = pong.LINETHICKNESS
+		#Draws paddle
+		self.draw.rectangle(((paddle.x,paddle.y),(paddle.x+pong.LINETHICKNESS,paddle.y+pong.PADDLESIZE)), fill=pong.WHITE)
+
+
+	#draws the ball
+	def drawBall(self, ball):
+		self.draw.rectangle(((ball.x,ball.y),(ball.x+pong.LINETHICKNESS,ball.y+pong.LINETHICKNESS)), fill=pong.WHITE)
+
+	#moves the ball returns new position
+	def moveBall(self, ball, ballDirX, ballDirY):
+		self.ballX += ballDirX
+		self.ballY += ballDirY
+		ball.x = int(self.ballX)
+		ball.y = int(self.ballY)
+		return ball
+
+	def tick(self):
+		self.drawArena()
+		self.drawPaddle(self.paddle1)
+		self.drawPaddle(self.paddle2)
+		self.drawBall(self.ball)
+
+		self.ball = self.moveBall(self.ball, self.ballDirX, self.ballDirY)
+		self.ballDirX, self.ballDirY = pong.checkEdgeCollision(self.ball, self.ballDirX, self.ballDirY)
+		self.score = pong.checkPointScored(self.paddle1, self.ball, self.score, self.ballDirX)
+		self.ballDirX = self.ballDirX * pong.checkHitBall(self.ball, self.paddle1, self.paddle2, self.ballDirX)
+		self.paddle1 = pong.artificialIntelligence1 (self.ball, self.ballDirX, self.paddle1)
+		self.paddle2 = pong.artificialIntelligence2 (self.ball, self.ballDirX, self.paddle2)
+		
+		# print ("P1: "+str(self.playerOnePosition))
+		# print ("P2: "+str(self.playerOnePosition))
+		#print("Ball X,Y = "+str(self.ballX)+", "+str(self.ballY))
+		#print (self.ball.centery)
+		
+		
+		if((self.score)>0):
+			return True
+		return False
+	
+	def getPixels(self):
+		return self.image
