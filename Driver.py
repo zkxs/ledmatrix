@@ -35,21 +35,22 @@ class Driver:
 		if(patternFactory is None):
 			print "Invalid pattern, options are: SMB3, SMB4, TULogo, PONG"
 			sys.exit(3)
-		self.display=self.initDisplay(patternFactory)
-		
 		
 		self.audioProcessor=self.initAudio()
+		self.display=self.initDisplay(patternFactory, self.audioProcessor)
+		self.audioProcessor.attachDisplay(self.display)
+		
 		print("Hello")
 		
 		
-	def initDisplay(self, patternFactory):
-		newDisplay=Display(Adafruit_RGBmatrix(32, 1), patternFactory)
+	def initDisplay(self, patternFactory, audioProcessor):
+		newDisplay=Display(Adafruit_RGBmatrix(32, 1), patternFactory, audioProcessor)
 		
 		return newDisplay;
 		
 		
 	def initAudio(self):
-		newAudio=AudioProcessor(self.display);
+		newAudio=AudioProcessor();
 		return newAudio
 	
 	

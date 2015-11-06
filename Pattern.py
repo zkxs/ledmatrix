@@ -90,47 +90,42 @@ class StaticImage(Pattern):
 
 
 class VolumePattern(Pattern):
-	def __init__(self, maxStates, timeStep):
+	def __init__(self, maxStates, timeStep, audioProcessor):
 		Pattern.__init__(self, maxStates, timeStep)#adjust second term to change timeout
+		self.audioProcessor = audioProcessor
 		self.ticksSinceAudio=0
 		self.avalibleSamples=0
 		self.image = Image.new("RGB", (32, 32))
 		self.draw  = ImageDraw.Draw(self.image)
-		self.audioLock=threading.Lock()
-		self.newVolume=0
-		
-	def addAmplitudePoint(self, volume):
-		
-		if (not self.audioLock.acquire(False)):
-			return False # will ignore data input in this case
-		else:
-			self.newVolume=(volume+self.newVolume*self.avalibleSamples
-				)//(self.avalibleSamples+1)#Weighted average
-			self.avalibleSamples+=1
-			self.audioLock.release()
-			if(volume>util.noiseThreshold):
-				self.ticksSinceAudio=0#concurrency on this variable is not important
-			return True
+		self.lastVolume=0
 	
 	def getPixels(self):
 		return self.image
+		
+	def tick(self):
+		volume = self.audioProcessor.getAmplitude()
+		self.lastVolume=(volume+self.lastVolume*self.avalibleSamples
+			)//(self.avalibleSamples+1) # Weighted average
+		self.avalibleSamples+=1
+		if(volume>util.noiseThreshold):
+			self.ticksSinceAudio=0 # concurrency on this variable is not important
+		return
 
 		
 		
 class Circles(VolumePattern):
-	def __init__(self):
-		VolumePattern.__init__(self, 75, .025)
+	def __init__(self, audioProcessor):
+		VolumePattern.__init__(self, 75, .025, audioProcessor)
 		self.pastData=deque()
 		for i in range(23):
 			self.pastData.append( (0, 0, 0) )
 			
 	def tick(self):
-		self.audioLock.acquire(1)
+		VolumePattern.tick(self)
 		if(self.avalibleSamples!=0):
 			self.pastData.popleft()
-			self.pastData.append(util.soundToColor(self.newVolume))
+			self.pastData.append(util.soundToColor(self.lastVolume))
 			self.avalibleSamples=0
-		self.audioLock.release()
 		
 		for r in range(23, 0, -1):
 			color=self.pastData.popleft()
@@ -142,8 +137,8 @@ class Circles(VolumePattern):
 		return self.ticksSinceAudio>=self.maxStates
 		
 class Bars(VolumePattern):
-	def __init__(self):
-		VolumePattern.__init__(self, 75, .025)
+	def __init__(self, audioProcessor):
+		VolumePattern.__init__(self, 75, .025, audioProcessor)
 		
 class BoringLines(VolumePattern):# I was bored this is bad do not use
 	"""I'm really not sure what this is doing, but it stalls noticeably
@@ -156,13 +151,10 @@ class BoringLines(VolumePattern):# I was bored this is bad do not use
 			self.pastData.append( (0, 0, 0) )
 			
 	def tick(self):
-		locked=self.audioLock.acquire(0)
-		if(locked==1):
-			self.prevColor=util.soundToColor(self.newVolume)
-			self.avalibleSamples=0
-			self.audioLock.release()
-		else:
-			self.pastData.append(self.prevColor)
+		VolumePattern.tick(self)
+
+		self.prevColor=util.soundToColor(self.lastVolume)
+		self.avalibleSamples=0
 		
 		self.pastData.popleft()
 		self.pastData.append(self.prevColor)

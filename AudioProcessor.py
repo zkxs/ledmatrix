@@ -17,7 +17,7 @@ class AudioProcessor:
 	SAMPLE_BYTES = 2 # must match the number of bytes in sample format
 	MAX_AMPLITUDE = 2 ** (8 * SAMPLE_BYTES) - 1
 	
-	def __init__(self, display):
+	def __init__(self):
 		self.terminateFlag=False
 		self.data_in = aa.PCM(aa.PCM_CAPTURE)
 		self.data_in.setchannels(1)
@@ -25,7 +25,7 @@ class AudioProcessor:
 		self.data_in.setformat(self.SAMPLE_FORMAT)
 		self.data_in.setperiodsize(self.PERIOD_SIZE)
 		self.audioPlaying=False
-		self.display=display
+		self.display=None
 		self.lock = threading.Lock()
 		
 		self.maxVolume = None
@@ -36,6 +36,9 @@ class AudioProcessor:
 		#self.sampleBuffer = deque(maxlen=self.BUFFER_SIZE)
 		#for i in range(self.BUFFER_SIZE):
 		#	self.sampleBuffer.append(0)
+		
+	def attachDisplay(self, display):
+		self.display=display
 			
 	
 	def start(self):#not set to terminate cleanly
@@ -66,7 +69,8 @@ class AudioProcessor:
 			if(self.maxVolume>util.noiseThreshold): # be extra sure here to avoid static
 				if(not self.audioPlaying):
 					self.audioPlaying=True
-					self.display.notifyAudioPlaying()
+					if (self.display is not None):
+						self.display.notifyAudioPlaying()
 			else:
 				if(self.audioPlaying):
 					self.audioPlaying=False
@@ -75,10 +79,10 @@ class AudioProcessor:
 			
 		print ("Audio Thread Ending")
 		
-	def getAmplitude():
+	def getAmplitude(self):
 		return self.maxVolume
 		
-	def getFFT():
+	def getFFT(self):
 		self.lock.acquire()
 		if self.fftDirty:
 			fftCopy = np.copy(self.fft)
