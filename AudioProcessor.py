@@ -53,7 +53,7 @@ class AudioProcessor:
 				except audioop.error, e:
 					if e.message !="not a whole number of frames":
 						raise e
-			time.sleep(1)#let other threads work
+			time.sleep(.001)#let other threads work
 		print ("Audio Thread Ending")
 	
 	def shutdown(self):
