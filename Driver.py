@@ -61,7 +61,7 @@ class Driver:
 	def start(self):
 		###dispThread=Thread(target=self.display.start)
 		audioThread=Thread(target=self.audioProcessor.start)#also wrong input
-		dispThread.start()
+		###dispThread.start()
 		audioThread.start()
 		print("Blocking")
 		
