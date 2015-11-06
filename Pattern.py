@@ -4,7 +4,6 @@ import Image
 import ImageDraw
 import random
 import util
-import threading
 from collections import deque
 import pong
 import numpy as np
@@ -206,10 +205,13 @@ class Bars(VolumePattern):
 			self.maxAmplitude += 0.010 * (maximum - self.maxAmplitude)	
 
 		
-		# draw bars
-		self.draw.rectangle([(0, 0), (31, 31)], fill=self.color_background)
+		# scale bars for display on a 32x32 grid
 		scaledBars = self.scale(self.barTops)
 		scaledCaps = self.scale(self.barCaps)
+		
+		
+		# draw bars
+		self.draw.rectangle([(0, 0), (31, 31)], fill=self.color_background)
 		
 		for i in range(0, self.numberOfBars):
 			
