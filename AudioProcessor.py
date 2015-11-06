@@ -34,7 +34,7 @@ class AudioProcessor:
 			# Read data from device
 			l,data = self.data_in.read()
 			print(data)
-			print("\n\n\n\n\n")
+			print("\n\n\n\n")
 			if l:
 				# catch frame error
 				try:
@@ -53,7 +53,7 @@ class AudioProcessor:
 				except audioop.error, e:
 					if e.message !="not a whole number of frames":
 						raise e
-			time.sleep(0)#let other threads work
+			time.sleep(1)#let other threads work
 		print ("Audio Thread Ending")
 	
 	def shutdown(self):
