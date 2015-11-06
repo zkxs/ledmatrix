@@ -11,11 +11,12 @@ from Pattern import *
 class Display:
 
 	def __init__(self, matrix, patternFactory, audioProcessor):
+		
+		self.audioPattern = Bars(audioProcessor)
 		self.matrix = matrix
 		self.patternTimer = 0
 		self.nextPattern = patternFactory
 		self.currentPattern = patternFactory
-		self.audioProcessor = audioProcessor
 		self.terminateFlag = False
 		self.audioPlaying = False
 	
@@ -25,7 +26,7 @@ class Display:
 			next = True
 			
 			if (self.audioPlaying):
-				self.currentPattern=Circles(self.audioProcessor)
+				self.currentPattern = self.audioPattern
 				while (next and not self.terminateFlag):
 					next = not self.update()
 					time.sleep(self.currentPattern.getTimeStep())

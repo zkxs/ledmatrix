@@ -7,6 +7,7 @@ import util
 import threading
 from collections import deque
 import pong
+import numpy as np
 
 class Pattern:
 	
@@ -108,8 +109,11 @@ class VolumePattern(Pattern):
 			)//(self.avalibleSamples+1) # Weighted average
 		self.avalibleSamples+=1
 		if(volume>util.noiseThreshold):
-			self.ticksSinceAudio=0 # concurrency on this variable is not important
-		return
+			self.ticksSinceAudio=0
+			
+		self.ticksSinceAudio+=1 # concurrency on this variable is not vital
+			
+		return self.ticksSinceAudio > self.maxStates
 
 		
 		
@@ -121,7 +125,7 @@ class Circles(VolumePattern):
 			self.pastData.append( (0, 0, 0) )
 			
 	def tick(self):
-		VolumePattern.tick(self)
+		toReturn = VolumePattern.tick(self)
 		if(self.avalibleSamples!=0):
 			self.pastData.popleft()
 			self.pastData.append(util.soundToColor(self.lastVolume))
@@ -132,13 +136,67 @@ class Circles(VolumePattern):
 			self.draw.ellipse((16-r, 16-r, 16+r, 16+r), fill=color)
 			self.pastData.append(color)
 		
-		self.ticksSinceAudio+=1#concurrency on this variable is not vital
-		
-		return self.ticksSinceAudio>=self.maxStates
+		return toReturn
 		
 class Bars(VolumePattern):
 	def __init__(self, audioProcessor):
 		VolumePattern.__init__(self, 75, .025, audioProcessor)
+		self.numberOfBars = 8
+		self.barWidth = 32 / self.numberOfBars
+		
+		self.barTops = np.zeros(self.numberOfBars)
+		self.barCaps = np.zeros(self.numberOfBars)
+		
+		self.maxAmplitude = 5000
+		self.minAmplitude = 0
+		
+		self.color_background = (0, 0, 0)
+		self.color_bar = (0, 200, 0)
+		self.color_cap = (140, 30, 30)
+		
+	def scale(self, array):
+		# scaled range is (32 - 0) = 32
+		unscaledRange = self.maxAmplitude - self.minAmplitude
+		return np.rint(np.clip((array - self.minAmplitude) * 32 / unscaledRange, 0, 32))
+		
+	def tick(self):
+		toReturn = VolumePattern.tick(self)
+		fft = (self.audioProcessor.getFFT())[0:self.numberOfBars]
+		
+		
+		np.maximum(fft, self.barTops, self.barTops)
+		np.maximum(fft, self.barCaps, self.barCaps)
+		
+		maximum = np.amax(self.barCaps)
+		if (maximum > (self.maxAmplitude * 1.4)):
+			self.maxAmplitude += 0.4 * (maximum - self.maxAmplitude)
+		elif (maximum < (self.maxAmplitude * 0.6)):
+			self.maxAmplitude += 0.4 * (maximum - self.maxAmplitude)	
+		
+
+		# decrement bartops
+		self.barTops -= 1000
+		
+		# draw bars
+		self.draw.rectangle([(0, 0), (31, 31)], fill=self.color_background)
+		scaledBars = self.scale(self.barTops)
+		for i in range(0, self.numberOfBars):
+			xPos = i * self.barWidth
+			self.draw.rectangle([(xPos,32 - scaledBars[i]), (xPos + self.barWidth,31)], fill = self.color_bar)
+			
+		
+		# decrement barcaps
+		self.barCaps -= 50
+		
+		
+		#print(self.barCaps)
+		#print(self.minAmplitude, np.amin(fft), self.maxAmplitude)
+		#print(self.scale(fft))
+		#print(fft)
+		
+		return toReturn
+		
+		
 		
 class BoringLines(VolumePattern):# I was bored this is bad do not use
 	"""I'm really not sure what this is doing, but it stalls noticeably
@@ -151,7 +209,7 @@ class BoringLines(VolumePattern):# I was bored this is bad do not use
 			self.pastData.append( (0, 0, 0) )
 			
 	def tick(self):
-		VolumePattern.tick(self)
+		toReturn = VolumePattern.tick(self)
 
 		self.prevColor=util.soundToColor(self.lastVolume)
 		self.avalibleSamples=0
@@ -164,9 +222,7 @@ class BoringLines(VolumePattern):# I was bored this is bad do not use
 			self.draw.point((31-(r%32) , 31-(r//32)), fill=color)
 			self.pastData.append(color)
 		
-		self.ticksSinceAudio+=1#concurrency on this variable is not vital
-		
-		return self.ticksSinceAudio>=self.maxStates
+		return toReturn
 
 #Global Variables to be used through our program
 
@@ -220,7 +276,7 @@ class PongPattern(Pattern):
 	
 	#Draws the arena the game will be played in. 
 	def drawArena(self):
-		self.draw.rectangle( ((0,0),(32,32)), fill=(0,0,0))
+		self.draw.rectangle( ((0,0),(31,31)), fill=(0,0,0))
 		#Draw centre line
 		#self.draw.line((((pong.WINDOWWIDTH/2),0),((pong.WINDOWWIDTH/2),pong.WINDOWHEIGHT)), width=(pong.LINETHICKNESS), fill=pong.WHITE)
 

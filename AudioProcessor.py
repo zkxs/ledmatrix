@@ -7,6 +7,7 @@ import numpy as np
 import sys
 from collections import deque
 import threading
+import math
 
 class AudioProcessor:
 	
@@ -30,6 +31,7 @@ class AudioProcessor:
 		
 		self.maxVolume = None
 		self.fft = None
+		self.fftCopy = None
 		self.fftDirty = True
 		
 		#self.sampleBuffer = np.zeros(5, dtype=np.int)
@@ -49,11 +51,10 @@ class AudioProcessor:
 			
 			if (l == self.PERIOD_SIZE): # sometimes ALSA returns a negative error code. I ignore this.
 				arr = self.MAX_AMPLITUDE - np.fromstring(data, dtype='<u2') # little endian unsigned 2-byte numbers
-				assert arr.size == self.PERIOD_SIZE, "unexpected array size: " + str(arr.size)
 				
 				self.maxVolume = np.amax(arr)
 				
-				localFFT = np.absolute(np.fft.rfft(arr))
+				localFFT = np.absolute(np.fft.rfft(arr) / math.sqrt(self.PERIOD_SIZE))
 				localFFT = localFFT[1:]
 				
 				self.lock.acquire()
@@ -63,9 +64,6 @@ class AudioProcessor:
 				
 				time.sleep(0.01)
 			
-			
-					
-			###audioPattern.addAmplitudePoint(self.maxVolume)
 			if(self.maxVolume>util.noiseThreshold): # be extra sure here to avoid static
 				if(not self.audioPlaying):
 					self.audioPlaying=True
@@ -85,10 +83,10 @@ class AudioProcessor:
 	def getFFT(self):
 		self.lock.acquire()
 		if self.fftDirty:
-			fftCopy = np.copy(self.fft)
+			self.fftCopy = np.copy(self.fft)
 			self.fftDirty = False
 		self.lock.release()
-		return fftCopy
+		return self.fftCopy
 	
 	def shutdown(self):
 		self.terminateFlag=True
