@@ -141,18 +141,25 @@ class Circles(VolumePattern):
 class Bars(VolumePattern):
 	def __init__(self, audioProcessor):
 		VolumePattern.__init__(self, 75, .025, audioProcessor)
-		self.numberOfBars = 8
+		self.numberOfBars = 16 # should probably be a factor of 32
 		self.barWidth = 32 / self.numberOfBars
 		
 		self.barTops = np.zeros(self.numberOfBars)
 		self.barCaps = np.zeros(self.numberOfBars)
 		
+		self.barTopVel = np.zeros(self.numberOfBars)
+		self.barCapVel = np.zeros(self.numberOfBars)
+		
+		self.barTopAccel = 40
+		self.barCapAccel = 10
+		
 		self.maxAmplitude = 5000
 		self.minAmplitude = 0
 		
-		self.color_background = (0, 0, 0)
-		self.color_bar = (0, 200, 0)
-		self.color_cap = (140, 30, 30)
+		self.color_background = (  0,   0,   0)
+		self.color_bar        = ( 15, 120,  15)
+		self.color_bar_dark   = ( 10,  60,  10)
+		self.color_cap        = (130,  30,  30)
 		
 	def scale(self, array):
 		# scaled range is (32 - 0) = 32
@@ -161,38 +168,57 @@ class Bars(VolumePattern):
 		
 	def tick(self):
 		toReturn = VolumePattern.tick(self)
+		
+		
+		# get the FFT from the audio processor (drop the first item because it's pretty garbage)
 		fft = (self.audioProcessor.getFFT())[0:self.numberOfBars]
 		
 		
-		np.maximum(fft, self.barTops, self.barTops)
-		np.maximum(fft, self.barCaps, self.barCaps)
-		
+		# update bar and cap positions and velocities
+		for i in range(0, self.numberOfBars):
+			if (fft[i] > self.barTops[i]):
+				self.barTops[i] = fft[i]
+				self.barTopVel[i] = 0
+			else:
+				self.barTopVel[i] += self.barTopAccel
+			self.barTops[i] -= self.barTopVel[i]
+				
+			if (fft[i] > self.barCaps[i]):
+				self.barCaps[i] = fft[i]
+				self.barCapVel[i] = 0	
+			else:
+				self.barCapVel[i] += self.barCapAccel
+			self.barCaps[i] -= self.barCapVel[i]
+			
+			
+		# handle scaling of maximums
 		maximum = np.amax(self.barCaps)
-		if (maximum > (self.maxAmplitude * 1.4)):
-			self.maxAmplitude += 0.4 * (maximum - self.maxAmplitude)
-		elif (maximum < (self.maxAmplitude * 0.6)):
-			self.maxAmplitude += 0.4 * (maximum - self.maxAmplitude)	
-		
+		if   (maximum > (self.maxAmplitude * 1.20)):
+			self.maxAmplitude += 0.050 * (maximum - self.maxAmplitude)
+		elif (maximum < (self.maxAmplitude * 0.10)):
+			self.maxAmplitude += 0.010 * (maximum - self.maxAmplitude)	
 
-		# decrement bartops
-		self.barTops -= 1000
 		
 		# draw bars
 		self.draw.rectangle([(0, 0), (31, 31)], fill=self.color_background)
 		scaledBars = self.scale(self.barTops)
+		scaledCaps = self.scale(self.barCaps)
+		
 		for i in range(0, self.numberOfBars):
-			xPos = i * self.barWidth
-			self.draw.rectangle([(xPos,32 - scaledBars[i]), (xPos + self.barWidth,31)], fill = self.color_bar)
 			
-		
-		# decrement barcaps
-		self.barCaps -= 50
-		
-		
-		#print(self.barCaps)
-		#print(self.minAmplitude, np.amin(fft), self.maxAmplitude)
-		#print(self.scale(fft))
-		#print(fft)
+			x1 =  i * self.barWidth
+			x2 = x1 + self.barWidth - 1
+			y1Bar = 32 - scaledBars[i]
+			y1Cap = 32 - scaledCaps[i]
+			
+			barColor = None
+			if (i % 2 == 0):
+				barColor = self.color_bar
+			else:
+				barColor = self.color_bar_dark
+			
+			self.draw.rectangle([(x1, y1Bar), (x2, 31   )], fill = barColor)
+			self.draw.rectangle([(x1, y1Cap), (x2, y1Cap)], fill = self.color_cap)
 		
 		return toReturn
 		
