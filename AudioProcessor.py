@@ -45,11 +45,10 @@ class AudioProcessor:
 				arr = self.MAX_AMPLITUDE - np.fromstring(data, dtype='<u2') # little endian unsigned 2-byte numbers
 				assert arr.size == self.PERIOD_SIZE, "unexpected array size: " + str(arr.size)
 				
-				mean = np.mean(arr)
+				#mean = np.mean(arr)
+				maxVolume = np.amax(arr)
+				print(maxVolume)
 				fft = np.absolute(np.fft.rfft(arr))
-				
-				print(mean)
-				print(fft)
 				
 				time.sleep(0.001)
 				
@@ -58,8 +57,8 @@ class AudioProcessor:
 			
 			
 					
-			audioPattern.addAmplitudePoint(mean)
-			if(mean>util.noiseThreshold):#be extra sure here to avoid static (formerly 6000)
+			audioPattern.addAmplitudePoint(maxVolume)
+			if(maxVolume>util.noiseThreshold):#be extra sure here to avoid static (formerly 6000)
 				if(not self.audioPlaying):
 					self.audioPlaying=True
 					self.display.currentPattern=audioPattern
