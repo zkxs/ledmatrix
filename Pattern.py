@@ -30,7 +30,7 @@ class Pattern:
 def randomPattern():
 	rand=random.random()
 	if rand<.33 :
-		return Animated(55, .09, "SMB3")
+		return StaticImage(10, "Luigi.png")#Animated(55, .09, "SMB3")
 	elif rand<.66 :
 		return Animated(116, .05, "SMB4")
 	else:

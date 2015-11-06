@@ -13,7 +13,7 @@ def soundToColor(soundAmplitude):
 		upscaledSound = (soundAmplitude * multiplier) % maxColor
 	
 
-	blue   = int(upscaledSound % byteSize)
+	red   = int(upscaledSound % byteSize)
 	upscaledSound /= 255
 	
 	if(upscaledSound%2==1):
@@ -25,7 +25,7 @@ def soundToColor(soundAmplitude):
 	if(upscaledSound%2==1):
 		green=255-green
 		
-	red  = int(upscaledSound % byteSize)
+	blue  = int(upscaledSound % byteSize)
 
 	
 	#print("R"+str(red)+"G"+str(green)+"B"+str(blue))
