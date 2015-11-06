@@ -47,7 +47,7 @@ class AudioProcessor:
 					if(max_vol>util.noiseThreshold):#be extra sure here to avoid static (formerly 6000)
 						if(not self.audioPlaying):
 							self.audioPlaying=True
-							self.display.currentPattern=audioPattern
+							###self.display.currentPattern=audioPattern
 					else:
 						if(self.audioPlaying):
 							self.audioPlaying=False
