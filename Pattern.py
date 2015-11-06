@@ -88,6 +88,7 @@ class StaticImage(Pattern):
 	def getPixels(self):
 		return self.image
 
+
 class VolumePattern(Pattern):
 	def __init__(self, maxStates, timeStep):
 		Pattern.__init__(self, maxStates, timeStep)#adjust second term to change timeout
@@ -100,8 +101,8 @@ class VolumePattern(Pattern):
 		
 	def addAmplitudePoint(self, volume):
 		
-		if (self.audioLock.acquire(0)==0):
-			return False#will ignore data input in this case
+		if (not self.audioLock.acquire(False)):
+			return False # will ignore data input in this case
 		else:
 			self.newVolume=(volume+self.newVolume*self.avalibleSamples
 				)//(self.avalibleSamples+1)#Weighted average
@@ -139,6 +140,10 @@ class Circles(VolumePattern):
 		self.ticksSinceAudio+=1#concurrency on this variable is not vital
 		
 		return self.ticksSinceAudio>=self.maxStates
+		
+class Bars(VolumePattern):
+	def __init__(self):
+		VolumePattern.__init__(self, 75, .025)
 		
 class BoringLines(VolumePattern):# I was bored this is bad do not use
 	"""I'm really not sure what this is doing, but it stalls noticeably

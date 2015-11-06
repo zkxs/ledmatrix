@@ -10,20 +10,31 @@ from Pattern import *
 
 class Display:
 
-	def __init__(self, matrix, pattern):
-		self.matrix=matrix
-		self.patternTimer=0
-		self.nextPattern= pattern
-		self.currentPattern = pattern
-		self.terminateFlag=False
+	def __init__(self, matrix, patternFactory):
+		self.matrix = matrix
+		self.patternTimer = 0
+		self.nextPattern = patternFactory
+		self.currentPattern = patternFactory
+		self.terminateFlag = False
+		self.audioPlaying = False
 	
 	def start(self):
-		while(not self.terminateFlag):
-			next=True
+		while (not self.terminateFlag):
+			
+			next = True
+			
+			if (self.audioPlaying):
+				self.currentPattern=Circles()
+				while (next and not self.terminateFlag):
+					next = not self.update()
+					time.sleep(self.currentPattern.getTimeStep())
+				self.audioPlaying = False
+			
 			self.currentPattern = self.nextPattern()
-			while(next and not self.terminateFlag):
-				next=not (self.update())
+			while(next and not self.terminateFlag and not self.audioPlaying):
+				next = not self.update()
 				time.sleep(self.currentPattern.getTimeStep())
+				
 		self.matrix.Clear()
 		print ("Display Thread Ending")
 	
@@ -36,3 +47,6 @@ class Display:
 	
 	def shutdown(self):
 		self.terminateFlag=True
+
+	def notifyAudioPlaying(self):
+		self.audioPlaying = True

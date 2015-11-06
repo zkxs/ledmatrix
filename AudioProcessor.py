@@ -1,7 +1,6 @@
 import alsaaudio as aa
 import audioop
 from Display import Display
-from Pattern import *
 import util
 import time
 import numpy as np
@@ -27,6 +26,11 @@ class AudioProcessor:
 		self.data_in.setperiodsize(self.PERIOD_SIZE)
 		self.audioPlaying=False
 		self.display=display
+		self.lock = threading.Lock()
+		
+		self.maxVolume = None
+		self.fft = None
+		self.fftDirty = True
 		
 		#self.sampleBuffer = np.zeros(5, dtype=np.int)
 		#self.sampleBuffer = deque(maxlen=self.BUFFER_SIZE)
@@ -35,40 +39,52 @@ class AudioProcessor:
 			
 	
 	def start(self):#not set to terminate cleanly
-		audioPattern=Circles()
 		print("audioStarting")
 		while (not self.terminateFlag):
 			# Read data from device
 			l,data = self.data_in.read()
 			
-			if (l == self.PERIOD_SIZE): # sometimes ALSA returns a negative error code
+			if (l == self.PERIOD_SIZE): # sometimes ALSA returns a negative error code. I ignore this.
 				arr = self.MAX_AMPLITUDE - np.fromstring(data, dtype='<u2') # little endian unsigned 2-byte numbers
 				assert arr.size == self.PERIOD_SIZE, "unexpected array size: " + str(arr.size)
 				
-				#mean = np.mean(arr)
-				maxVolume = np.amax(arr)
-				print(maxVolume)
-				fft = np.absolute(np.fft.rfft(arr))
+				self.maxVolume = np.amax(arr)
 				
-				time.sleep(0.001)
+				localFFT = np.absolute(np.fft.rfft(arr))
+				localFFT = localFFT[1:]
 				
-			# else:
-			# 	print("your numbers are bad and you should feel bad")
+				self.lock.acquire()
+				self.fftDirty = True
+				self.fft = localFFT
+				self.lock.release()
+				
+				time.sleep(0.01)
 			
 			
 					
-			audioPattern.addAmplitudePoint(maxVolume)
-			if(maxVolume>util.noiseThreshold):#be extra sure here to avoid static (formerly 6000)
+			###audioPattern.addAmplitudePoint(self.maxVolume)
+			if(self.maxVolume>util.noiseThreshold): # be extra sure here to avoid static
 				if(not self.audioPlaying):
 					self.audioPlaying=True
-					self.display.currentPattern=audioPattern
+					self.display.notifyAudioPlaying()
 			else:
 				if(self.audioPlaying):
 					self.audioPlaying=False
 							
-			time.sleep(.001)#let other threads work
+			time.sleep(.001) #let other threads work
 			
 		print ("Audio Thread Ending")
+		
+	def getAmplitude():
+		return self.maxVolume
+		
+	def getFFT():
+		self.lock.acquire()
+		if self.fftDirty:
+			fftCopy = np.copy(self.fft)
+			self.fftDirty = False
+		self.lock.release()
+		return fftCopy
 	
 	def shutdown(self):
 		self.terminateFlag=True

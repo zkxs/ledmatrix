@@ -13,6 +13,7 @@ import util
 from AudioProcessor import AudioProcessor
 
 class Driver:
+	
 	def __init__(self):
 		patternString = ''
 		helpString = 'Display.py -p <pattern>'
@@ -30,32 +31,32 @@ class Driver:
 			elif opt in ("-p", "--pattern"):
 				patternString = arg.upper()
 		
-		pattern=getPatternFromString(patternString)
-		if(pattern is None):
+		patternFactory=getPatternFromString(patternString)
+		if(patternFactory is None):
 			print "Invalid pattern, options are: SMB3, SMB4, TULogo, PONG"
 			sys.exit(3)
-		self.display=self.initDisplay(pattern)
+		self.display=self.initDisplay(patternFactory)
 		
 		
 		self.audioProcessor=self.initAudio()
 		print("Hello")
 		
 		
-	
-	def initDisplay(self, pattern):
-		newDisplay=Display(Adafruit_RGBmatrix(32, 1), pattern)
+	def initDisplay(self, patternFactory):
+		newDisplay=Display(Adafruit_RGBmatrix(32, 1), patternFactory)
 		
 		return newDisplay;
+		
 		
 	def initAudio(self):
 		newAudio=AudioProcessor(self.display);
 		return newAudio
 	
-		
 	
 	def shutdown(self):
 		self.display.shutdown()
 		self.audioProcessor.shutdown()
+	
 	
 	def start(self):
 		dispThread=Thread(target=self.display.start)
@@ -63,7 +64,6 @@ class Driver:
 		dispThread.start()
 		audioThread.start()
 		print("Blocking")
-		
 			
 	
 driver=Driver()
@@ -73,5 +73,4 @@ try:
 		time.sleep(2147483647)#Sleep forever... Join was problematic for some reason
 except KeyboardInterrupt:
 	print ("Exiting")
-	
 	driver.shutdown()
