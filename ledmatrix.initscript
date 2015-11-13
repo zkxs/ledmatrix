@@ -31,9 +31,9 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Shows cool patterns"                # String describing the service
 NAME="ledmatrix"                          # Name of the service, will be used in another vars
 DAEMON="/usr/bin/python"                  # Path to the service executable, e.g. /usr/bin/java
-DAEMON_ARGS="/home/michael/ledmatrix/Driver.py"  # Arguments passed to the service startup
+DAEMON_ARGS="/home/pi/ledmatrix/Driver.py"  # Arguments passed to the service startup
 
-WORK_DIR="/home/michael/ledmatrix"        # Working directory where the service will be started, defaults to /var/lib/${NAME}
+WORK_DIR="/home/pi/ledmatrix"        # Working directory where the service will be started, defaults to /var/lib/${NAME}
 USER=root                                 # User that will spawn the process, defaults to the service name
 GROUP=root                                # Group that will spawn the process, defaults to the service name
 PIDFILE=/var/run/${NAME}.pid              # Pid file location, defaults to /var/run/${NAME}.pid

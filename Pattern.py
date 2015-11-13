@@ -28,10 +28,12 @@ class Pattern:
 
 def randomPattern():
 	rand=random.random()
-	if rand<.33 :
+	if rand<.25 :
 		return StaticImage(10, "Luigi.png")#Animated(55, .09, "SMB3")
-	elif rand<.66 :
+	elif rand<.5 :
 		return Animated(116, .05, "SMB4")
+	elif rand<.75 :
+		return StaticImage(10, "Great_Ball_Sprite.png")
 	else:
 		return PongPattern()#return StaticImage(10, "TU.png")
 
@@ -55,6 +57,9 @@ def getPatternFromString(patternString):
 	elif patternString == "PONG":
 		print "selected Pong pattern"
 		return lambda: PongPattern()
+	elif patternString == "POKEMON":
+		print "selected Pong pattern"
+		return lambda: StaticImage(10, "Great_Ball_Sprite.png")
 	elif patternString == "":
 		print "selected random pattern"
 		return lambda: randomPattern()
@@ -280,6 +285,11 @@ class PongPattern(Pattern):
 		self.image = Image.new("RGB", (32, 32))
 		self.draw  = ImageDraw.Draw(self.image)
 		
+		# Set up the colours
+		self.BLACK     = (0  ,0  ,0  )
+		self.WHITE     = (0,255,255)
+		
+		
 		#Initiate variable and set starting positions
 		#any future changes made within rectangles
 		self.ballX = float(pong.WINDOWWIDTH/2 - pong.LINETHICKNESS/2)
@@ -287,11 +297,13 @@ class PongPattern(Pattern):
 		self.playerOnePosition = (pong.WINDOWHEIGHT - pong.PADDLESIZE) /2
 		self.playerTwoPosition = (pong.WINDOWHEIGHT - pong.PADDLESIZE) /2
 		self.score = 0
-		
+		self.rally=0
 	
 		
 		#Keeps track of ball direction
 		self.ballDirX = 2*random.random()-1 ## -1 = left 1 = right
+		while(abs(self.ballDirX)<.5):
+			self.ballDirX = 2*random.random()-1 #minimum speed
 		self.ballDirY = 2*random.random()-1 ## -1 = up 1 = down
 		
 		#print ("dx,dy "+str(self.ballDirX)+", "+str(self.ballDirY))
@@ -327,12 +339,12 @@ class PongPattern(Pattern):
 		elif paddle.top < pong.LINETHICKNESS:
 			paddle.top = pong.LINETHICKNESS
 		#Draws paddle
-		self.draw.rectangle(((paddle.x,paddle.y),(paddle.x+pong.LINETHICKNESS,paddle.y+pong.PADDLESIZE)), fill=pong.WHITE)
+		self.draw.rectangle(((paddle.x,paddle.y),(paddle.x+pong.LINETHICKNESS,paddle.y+pong.PADDLESIZE)), fill=self.WHITE)
 
 
 	#draws the ball
 	def drawBall(self, ball):
-		self.draw.rectangle(((ball.x,ball.y),(ball.x+pong.LINETHICKNESS,ball.y+pong.LINETHICKNESS)), fill=pong.WHITE)
+		self.draw.rectangle(((ball.x,ball.y),(ball.x+pong.LINETHICKNESS,ball.y+pong.LINETHICKNESS)), fill=self.WHITE)
 
 	#moves the ball returns new position
 	def moveBall(self, ball, ballDirX, ballDirY):
@@ -350,18 +362,26 @@ class PongPattern(Pattern):
 
 		self.ball = self.moveBall(self.ball, self.ballDirX, self.ballDirY)
 		self.ballDirX, self.ballDirY = pong.checkEdgeCollision(self.ball, self.ballDirX, self.ballDirY)
-		self.score = pong.checkPointScored(self.paddle1, self.ball, self.score, self.ballDirX)
-		self.ballDirX = self.ballDirX * pong.checkHitBall(self.ball, self.paddle1, self.paddle2, self.ballDirX)
+		self.score = pong.checkPointScored(self.paddle1, self.ball, self.score)
+		self.ballDirX,self.rally = pong.checkHitBall(self.ball, self.paddle1, self.paddle2, self.ballDirX, self.rally)
 		self.paddle1 = pong.artificialIntelligence1 (self.ball, self.ballDirX, self.paddle1)
 		self.paddle2 = pong.artificialIntelligence2 (self.ball, self.ballDirX, self.paddle2)
 		
+		self.WHITE=(min(self.rally*10,255), max(0,255-self.rally*10), max(0,255-self.rally*10))
 		# print ("P1: "+str(self.playerOnePosition))
 		# print ("P2: "+str(self.playerOnePosition))
 		#print("Ball X,Y = "+str(self.ballX)+", "+str(self.ballY))
 		#print (self.ball.centery)
 		
+		
+		
 		self.currentState+=1
-		if((self.score)>0 or self.currentState>=self.maxStates):
+		if(self.score<0):
+			self.currentState+=100
+		elif(self.score>0):
+			self.currentState+=100
+		
+		if (self.currentState>=self.maxStates):
 			return True
 		return False
 	

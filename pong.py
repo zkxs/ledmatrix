@@ -1,44 +1,39 @@
-WINDOWWIDTH = 32
-WINDOWHEIGHT = 32
+WINDOWWIDTH = 31
+WINDOWHEIGHT = 31
 LINETHICKNESS = 2
-PADDLESIZE = 5
+PADDLESIZE = 7
 PADDLEOFFSET = 1
 
-# Set up the colours
-BLACK     = (0  ,0  ,0  )
-WHITE     = (0,255,255)
+MAXSPEED=3
 
 
 
 #Checks for a collision with a wall, and 'bounces' ball off it.
 #Returns new direction
 def checkEdgeCollision(ball, ballDirX, ballDirY):
-	if ball.top == (LINETHICKNESS) or ball.bottom == (WINDOWHEIGHT - LINETHICKNESS):
-		ballDirY = ballDirY * -1.0
-	if ball.left == (LINETHICKNESS) or ball.right == (WINDOWWIDTH - LINETHICKNESS):
-		ballDirX = ballDirX * -1.0
+	if ball.top <= (LINETHICKNESS) or ball.bottom >= (WINDOWHEIGHT - LINETHICKNESS):
+		ballDirY = ballDirY * -1.01
 	return ballDirX, ballDirY
 
 #Checks is the ball has hit a paddle, and 'bounces' ball off it.     
-def checkHitBall(ball, paddle1, paddle2, ballDirX):
-	if ballDirX < 0 and paddle1.right == ball.left and paddle1.top < ball.top and paddle1.bottom > ball.bottom:
-		return -1.01#more speed!
-	elif ballDirX > 0 and paddle2.left == ball.right and paddle2.top < ball.top and paddle2.bottom > ball.bottom:
-		return -1.01
-	else: return 1
+def checkHitBall(ball, paddle1, paddle2, ballDirX, rally):
+	if ballDirX < 0 and paddle1.right >= ball.left and paddle1.top < ball.top and paddle1.bottom > ball.bottom:
+		return min(1.08*abs(ballDirX),MAXSPEED), (rally+1)#more speed!
+	elif ballDirX > 0 and paddle2.left <= ball.right and paddle2.top < ball.top and paddle2.bottom > ball.bottom:
+		return max((-1.08*abs(ballDirX)),-MAXSPEED), (rally+1)
+	else: return ballDirX, rally
 
 #Checks to see if a point has been scored returns new score
-def checkPointScored(paddle1, ball, score, ballDirX):
+def checkPointScored(paddle1, ball, score):
 	#reset points if left wall is hit
 	if ball.left == LINETHICKNESS: 
 		return 0
-	#1 point for hitting the ball NO!
-	elif ballDirX == -1 and paddle1.right == ball.left and paddle1.top < ball.top and paddle1.bottom > ball.bottom:
-		score += 0
-		return score
 	#5 points for beating the other paddle
-	elif ball.right == WINDOWWIDTH - LINETHICKNESS:
+	elif ball.right >= WINDOWWIDTH:
 		score += 1
+		return score
+	elif ball.left <= 0:
+		score -= 1
 		return score
 	#if no points scored, return score unchanged
 	else: return score
@@ -53,18 +48,18 @@ def artificialIntelligence2(ball, ballDirX, paddle2):
 			paddle2.y -= 1
 	#if ball moving towards bat, track its movement. 
 	elif ballDirX >0:
-		if paddle2.centery < ball.centery:
+		if paddle2.centery < (ball.centery-1):
 			paddle2.y += 1
-		else:
+		elif paddle2.centery > (ball.centery+1):
 			paddle2.y -=1
 	return paddle2
 
 def artificialIntelligence1(ball, ballDirX, paddle1):
 	#If ball is moving away from paddle, center bat???
 	if ballDirX < 0:
-		if paddle1.centery < ball.centery:
+		if paddle1.centery < (ball.centery-1):
 			paddle1.y += 1
-		else:
+		elif paddle1.centery > (ball.centery+1):
 			paddle1.y -=1
 	#if ball moving towards bat, track its movement. ???
 	elif ballDirX > 0:
