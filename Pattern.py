@@ -7,6 +7,44 @@ import util
 from collections import deque
 import pong
 import numpy as np
+#Late addtions
+"""import alsaaudio
+import wave
+from threading import Thread
+
+def playWav():    
+	
+	f = wave.open("Test.wav", 'rb')
+	device = alsaaudio.PCM(card='default')
+	
+	print('%d channels, %d sampling rate\n' % (f.getnchannels(),
+											   f.getframerate()))
+	# Set attributes
+	device.setchannels(f.getnchannels())
+	device.setrate(f.getframerate())
+
+	# 8bit is unsigned in wav files
+	if f.getsampwidth() == 1:
+		device.setformat(alsaaudio.PCM_FORMAT_U8)
+	# Otherwise we assume signed data, little endian
+	elif f.getsampwidth() == 2:
+		device.setformat(alsaaudio.PCM_FORMAT_S16_LE)
+	elif f.getsampwidth() == 3:
+		device.setformat(alsaaudio.PCM_FORMAT_S24_LE)
+	elif f.getsampwidth() == 4:
+		device.setformat(alsaaudio.PCM_FORMAT_S32_LE)
+	else:
+		raise ValueError('Unsupported format')
+
+	device.setperiodsize(320)
+
+	data = f.readframes(320)
+	while data:
+		# Read data from stdin
+		device.write(data)
+		data = f.readframes(320)
+	
+	f.close()"""
 
 class Pattern:
 	
@@ -28,14 +66,32 @@ class Pattern:
 
 def randomPattern():
 	rand=random.random()
-	if rand<.25 :
+	"""if rand<.25 :
 		return StaticImage(10, "Luigi.png")#Animated(55, .09, "SMB3")
 	elif rand<.5 :
 		return Animated(116, .05, "SMB4")
 	elif rand<.75 :
 		return StaticImage(10, "Great_Ball_Sprite.png")
 	else:
-		return PongPattern()#return StaticImage(10, "TU.png")
+		return PongPattern()#return StaticImage(10, "TU.png")"""
+	if rand<.75 :
+		return Animated(42, .15, "CHILEE")
+	elif rand<.8 :
+		return Animated(116, .05, "SMB4")
+	elif rand<.85 :
+		return StaticImage(25, "TU.gif")
+	elif rand<.9 :
+		return StaticImage(10, "Great_Ball_Sprite.png")
+	elif rand<.95 :
+		return StaticImage(10, "Luigi.png")
+	else:
+		return PongPattern()
+	
+	# else: 
+		
+		# wavThread=Thread(target=playWav)
+		# wavThread.start()
+		# return Animated(116, .05, "SMB4")
 
 def randomAudioPattern(audioProcessor):
 	rand=random.random()
@@ -53,13 +109,23 @@ def getPatternFromString(patternString):
 		return lambda: Animated(116, .05, "SMB4")
 	elif patternString == "TULOGO":
 		print "selected TULOGO pattern"
-		return lambda: StaticImage(10, "TU.png")
+		return lambda: StaticImage(10, "TU.gif")
 	elif patternString == "PONG":
 		print "selected Pong pattern"
 		return lambda: PongPattern()
 	elif patternString == "POKEMON":
 		print "selected Pong pattern"
 		return lambda: StaticImage(10, "Great_Ball_Sprite.png")
+	elif patternString == "CHILI":
+		print "selected Chili pattern"
+		return lambda: Animated(42, .15, "CHILEE")
+	elif patternString == "LUIGI":
+		print "selected Luigi pattern"
+		return lambda: StaticImage(10, "Luigi.png")
+	elif patternString == "MUSIC":
+		wavThread=Thread(target=playWav)
+		wavThread.start()
+		return lambda: Animated(116, .05, "SMB4")
 	elif patternString == "":
 		print "selected random pattern"
 		return lambda: randomPattern()
