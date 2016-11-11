@@ -33,7 +33,7 @@ class Driver:
 		
 		patternFactory=getPatternFromString(patternString)
 		if(patternFactory is None):
-			print "Invalid pattern, options are: SMB3, SMB4, TULogo, PONG, POKEMON, and CHILI"
+			print "Invalid pattern, options are: SMB3, SMB4, TULogo, PONG, POKEBALL, PIKACHU, KIRBY, BELL, ECE and CHILI"
 			sys.exit(3)
 		
 		self.audioProcessor=self.initAudio()

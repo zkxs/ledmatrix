@@ -65,7 +65,9 @@ class Pattern:
 		return self.timeStep
 
 def randomPattern():
-	rand=random.random()
+	maxImages=19#Used for easier even distributions
+	rand=random.random()*maxImages
+	
 	"""if rand<.25 :
 		return StaticImage(10, "Luigi.png")#Animated(55, .09, "SMB3")
 	elif rand<.5 :
@@ -74,19 +76,27 @@ def randomPattern():
 		return StaticImage(10, "Great_Ball_Sprite.png")
 	else:
 		return PongPattern()#return StaticImage(10, "TU.png")"""
-	if rand<.75 :
+	if rand<1 :
 		return Animated(42, .15, "CHILEE")
-	elif rand<.8 :
+	elif rand<2 :
 		return Animated(116, .05, "SMB4")
-	elif rand<.85 :
-		return StaticImage(25, "TU.gif")
-	elif rand<.9 :
+	elif rand<6 : #step by 4 to increase likelyhood
+		return StaticImage(10, "TU.gif")
+	elif rand<7 :
 		return StaticImage(10, "Great_Ball_Sprite.png")
-	elif rand<.95 :
+	elif rand<8 :
 		return StaticImage(10, "Luigi.png")
-	else:
+	elif rand<11 :#step by 3, triple weight
+		return Animated(7, .5, "TUECE1")
+	elif rand<12 :
+		return Animated(136, .05, "KVD32")
+	elif rand<13 :
+		return Animated(20, .1, "PIKACHU")
+	elif rand<17 : #step by 4
+		return StaticImage(10, "TUBell.gif")
+	else:#Some extra probability for this one
 		return PongPattern()
-	
+		
 	# else: 
 		
 		# wavThread=Thread(target=playWav)
@@ -113,8 +123,8 @@ def getPatternFromString(patternString):
 	elif patternString == "PONG":
 		print "selected Pong pattern"
 		return lambda: PongPattern()
-	elif patternString == "POKEMON":
-		print "selected Pong pattern"
+	elif patternString == "POKEBALL":
+		print "selected Pokeball pattern"
 		return lambda: StaticImage(10, "Great_Ball_Sprite.png")
 	elif patternString == "CHILI":
 		print "selected Chili pattern"
@@ -122,6 +132,18 @@ def getPatternFromString(patternString):
 	elif patternString == "LUIGI":
 		print "selected Luigi pattern"
 		return lambda: StaticImage(10, "Luigi.png")
+	elif patternString == "KIRBY":
+		print "selected Kirby pattern"
+		return lambda: Animated(136, .05, "KVD32")
+	elif patternString == "ECE":
+		print "selected ECE pattern"
+		return lambda: Animated(7, .5, "TUECE1")
+	elif patternString == "BELL":
+		print "selected Bell pattern"
+		return lambda: StaticImage(10, "TUBell.gif")
+	elif patternString == "PIKACHU":
+		print "selected Pikachu pattern"
+		return lambda: Animated(20, .1, "PIKACHU")
 	elif patternString == "MUSIC":
 		wavThread=Thread(target=playWav)
 		wavThread.start()
