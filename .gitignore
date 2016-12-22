@@ -1,6 +1,9 @@
-/SMB3gif
-/SMB4gif
-/SMB5gif
+# Images and sounds
+*.gif
+*.png
+*.wav
+
+# Libraries
 /ada-matrix.py
 /fonts
 /img
@@ -8,12 +11,6 @@
 /lib
 /pyalsa-1.0.14rc3
 /rgbmatrix.so
+
+# Compiled Python bytecode
 *.pyc
-/TU.png
-/TU.gif
-/CHILEEgif
-/Test.wav
-/TUECE1gif
-/TUBell.gif
-/PIKACHUgif
-/KVD32gif
